@@ -3,43 +3,37 @@ import {AppState, View} from 'react-native';
 import {usePermissionStore} from '../store/permissions/usePermissionStore';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {RootStackParams} from '../navigation/StackNavigator';
-export const PermissionChecker = ({children}: PropsWithChildren) => {
+
+export const PermissionsChecker = ({children}: PropsWithChildren) => {
   const {locationStatus, checkLocationPermission} = usePermissionStore();
   const navigation = useNavigation<NavigationProp<RootStackParams>>();
 
   useEffect(() => {
     if (locationStatus === 'granted') {
+      
       navigation.reset({
-        routes: [
-          {
-            name: 'MapScreen',
-          },
-        ],
+        routes: [{name: 'MapScreen'}],
       });
-    } else if (locationStatus != 'undetermined') {
+    } else if (locationStatus !== 'undetermined') {
       navigation.reset({
-        routes: [
-          {
-            name: 'PermissionScreen',
-          },
-        ],
+        routes: [{name: 'PermissionScreen'}],
       });
     }
-  }, []);
+  }, [locationStatus]);
 
   useEffect(() => {
     checkLocationPermission();
   }, []);
 
   useEffect(() => {
-    const suscription = AppState.addEventListener('change', nextAppState => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
       if (nextAppState === 'active') {
         checkLocationPermission();
       }
     });
 
     return () => {
-      suscription.remove();
+      subscription.remove();
     };
   }, []);
 
